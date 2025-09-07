@@ -3,5 +3,6 @@
         "dotenv",
         "genai",
         "generativeai"
-    ]
+    ],
+    "git.ignoreLimitWarning": true
 }
