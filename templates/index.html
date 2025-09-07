@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Expense Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="max-w-4xl mx-auto p-4">
+        <h1 class="text-3xl font-bold text-center mb-6">📊 AI-Powered Expense Analyzer</h1>
+
+        <!-- File Upload Form -->
+        <form method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded shadow-md mb-6">
+            <label class="block mb-2 text-sm font-semibold">Upload Expense File (.xlsx / .csv):</label>
+            <input type="file" name="file" class="border p-2 rounded w-full mb-4" required>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                Upload & Analyze
+            </button>
+        </form>
+
+        <!-- Summary Table -->
+        {% if summary %}
+        <div class="bg-white p-6 rounded shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">📅 Monthly Expense Summary</h2>
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full border">
+                    <thead>
+                        <tr class="bg-gray-100 text-left">
+                            <th class="px-4 py-2 border">Month</th>
+                            <th class="px-4 py-2 border">Category</th>
+                            <th class="px-4 py-2 border">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in summary %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 border">{{ row[0] }}</td>
+                            <td class="px-4 py-2 border">{{ row[1] }}</td>
+                            <td class="px-4 py-2 border">{{ row[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- AI Insight -->
+        {% if insight %}
+        <div class="bg-green-50 border border-green-200 p-6 rounded shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">🤖 AI Insights</h2>
+            <pre class="whitespace-pre-wrap">{{ insight }}</pre>
+        </div>
+        {% endif %}
+
+        <!-- Charts -->
+        {% if bar_labels %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="text-lg font-semibold mb-2">Bar Chart: Total Expense per Category</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="text-lg font-semibold mb-2">Pie Chart: Expense Distribution</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Chart.js Script -->
+    <script>
+        {% if bar_labels %}
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        const barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ bar_labels | tojson }},
+                datasets: [{
+                    label: 'Amount (₹)',
+                    data: {{ bar_values | tojson }},
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ pie_labels | tojson }},
+                datasets: [{
+                    data: {{ pie_values | tojson }},
+                    backgroundColor: [
+                        '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899',
+                        '#14b8a6', '#a855f7', '#f97316', '#0ea5e9'
+                    ],
+                }]
+            },
+            options: {
+                responsive: true,
+            }
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
